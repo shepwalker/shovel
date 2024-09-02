@@ -23,5 +23,6 @@ const load: Loader = async (domain: string) => {
   };
 };
 
-const exports = { load, name: "atproto" };
-export default exports;
+const atproto_exports = { load, name: 'atproto' };
+export default atproto_exports;
+

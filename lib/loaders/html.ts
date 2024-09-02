@@ -36,5 +36,6 @@ const load: Loader = async (domain: string) => {
   }
 };
 
-const exports = { load, name: "html" };
-export default exports;
+const html_exports = { load, name: 'html' };
+export default html_exports;
+

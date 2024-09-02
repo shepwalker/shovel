@@ -158,5 +158,6 @@ const parse: Parser = (data) => {
       .flatMap((datum) => RULES.flatMap((rule) => datum.data.flatMap(rule)))
   );
 };
-const exports = { parse };
-export default exports;
+const dns_exports = { parse };
+export default dns_exports;
+

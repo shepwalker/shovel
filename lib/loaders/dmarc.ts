@@ -23,5 +23,6 @@ const load: Loader = async (domain: string) => {
   };
 };
 
-const exports = { load, name: "dmarc" };
-export default exports;
+const dmarc_exports = { load, name: 'dmarc' };
+export default dmarc_exports;
+

@@ -49,5 +49,6 @@ const load: Loader = async (domain: string) => {
   };
 };
 
-const exports = { load, name: "dns" };
-export default exports;
+const dns_exports = { load, name: 'dns' };
+export default dns_exports;
+
