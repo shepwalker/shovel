@@ -11,8 +11,8 @@ export type Genre =
   | "cms"
   | "crm"
   | "design"
+  | "devtools"
   | "dns"
-  | "search"
   | "documentation"
   | "ecommerce"
   | "email"
@@ -25,8 +25,10 @@ export type Genre =
   | "open_web"
   | "payments"
   | "podcast"
+  | "search"
   | "security"
   | "social_media"
+  | "static_site_generator"
   | "support"
   | "videos"
   | "web_framework";
@@ -37,6 +39,14 @@ export const GENRE_REGISTRY: {
     description: string;
   };
 } = {
+  static_site_generator: {
+    name: "Static Site Generator",
+    description: "Static site generators",
+  },
+  devtools: {
+    name: "Developer Tools",
+    description: "Developer tools",
+  },
   ads: {
     name: "Advertising",
     description: "Advertising services",
@@ -166,11 +176,50 @@ type Service = {
   urlSubstrings?: string[];
   substrings?: string[];
   defunct?: boolean;
+  headers?: {
+    [key: string]: string;
+  };
+  dns_prefix?: string;
 };
 
 export const REGISTRY: {
   [key: string]: Service;
 } = {
+  webex: {
+    identifier: "webex",
+    name: "Webex",
+    genre: "hosting",
+    url: "https://www.webex.com",
+    txt_values: ["webexdomainverification"],
+  },
+  liveramp: {
+    identifier: "liveramp",
+    name: "Liveramp",
+    genre: "marketing",
+    url: "https://liveramp.com",
+    txt_values: ["liveramp-site-verification"],
+  },
+  paloalto: {
+    identifier: "paloalto",
+    name: "Palo Alto",
+    genre: "security",
+    url: "https://www.paloaltonetworks.com",
+    txt_values: ["paloaltonetworks-site-verification"],
+  },
+  headway: {
+    identifier: "headway",
+    name: "Headway",
+    genre: "support",
+    url: "https://headwayapp.co",
+    cname_values: ["headwayapp.co"],
+  },
+  skysnag: {
+    identifier: "skysnag",
+    name: "Skysnag",
+    genre: "security",
+    url: "https://skysnag.com",
+    spf_values: ["_spf.skysnag.com"],
+  },
   constantcontact: {
     identifier: "constantcontact",
     name: "Constant Contact",
@@ -198,6 +247,13 @@ export const REGISTRY: {
     genre: "crm",
     url: "https://formassembly.com",
     spf_values: ["spf1.formassembly.com"],
+  },
+  fireside: {
+    identifier: "fireside",
+    name: "Fireside",
+    genre: "podcast",
+    url: "https://fireside.fm",
+    cname_values: ["hosted.fireside.fm"],
   },
   geojs: {
     identifier: "geojs",
@@ -263,6 +319,13 @@ export const REGISTRY: {
     genre: "email",
     mx_values: ["mx1.improvmx.com"],
   },
+  proofpoint: {
+    identifier: "proofpoint",
+    name: "Proofpoint",
+    url: "https://www.proofpoint.com",
+    genre: "security",
+    mx_values: ["pphosted.com"],
+  },
   namecheap: {
     identifier: "namecheap",
     name: "Namecheap",
@@ -316,6 +379,7 @@ export const REGISTRY: {
     genre: "hosting",
     ns_values: ["wixdns.net"],
     substrings: ["Wix.com Website Builder"],
+    cname_values: ["wixdns.net"],
   },
   zoho_invoices: {
     identifier: "zoho_invoices",
@@ -445,7 +509,7 @@ export const REGISTRY: {
     name: "Astro",
     genre: "web_framework",
     url: "https://astro.build",
-    substrings: ["astro-slot"],
+    substrings: ["astro-slot", "/_astro"],
   },
   chargebee: {
     identifier: "chargebee",
@@ -497,12 +561,19 @@ export const REGISTRY: {
     genre: "marketing",
     substrings: ["script.tapfiliate.com"],
   },
+  wistia: {
+    identifier: "wistia",
+    name: "Wistia",
+    url: "https://wistia.com",
+    genre: "videos",
+    substrings: ["wistia.com/embed"],
+  },
   rightmessage: {
     identifier: "rightmessage",
     name: "RightMessage",
     url: "https://www.rightmessage.com",
     genre: "email",
-    substrings: ["rightmessage-id"],
+    substrings: ["rightmessage-id", "tb.rightmessage.com"],
   },
   sendowl: {
     identifier: "sendowl",
@@ -580,14 +651,14 @@ export const REGISTRY: {
     name: "Algolia",
     genre: "search",
     url: "https://www.algolia.com",
-    substrings: ['algolia.net" crossorigin'],
+    substrings: ['algolia.net" crossorigin', "AlgoliaOpts"],
   },
   bootstrap: {
     identifier: "bootstrap",
     name: "Bootstrap",
     genre: "web_framework",
     url: "https://getbootstrap.com",
-    substrings: ["bootstrapcdn.com"],
+    substrings: ["bootstrapcdn.com", "navbar-brand", "bootstrap.min.js"],
   },
   loom: {
     identifier: "loom",
@@ -595,6 +666,13 @@ export const REGISTRY: {
     genre: "videos",
     url: "https://www.loom.com",
     txt_values: ["loom-verification", "loom-site-verification"],
+  },
+  vite: {
+    identifier: "vite",
+    name: "Vite",
+    genre: "web_framework",
+    url: "https://vitejs.dev",
+    substrings: ["/vite/"],
   },
   tailwindcss: {
     identifier: "tailwindcss",
@@ -624,13 +702,6 @@ export const REGISTRY: {
     genre: "analytics",
     url: "https://www.gaug.es",
     substrings: ["gaug.es"],
-  },
-  sendinblue: {
-    identifier: "sendinblue",
-    name: "Sendinblue",
-    genre: "email",
-    url: "https://www.sendinblue.com",
-    spf_values: ["spf.sendinblue.com"],
   },
   mailjet: {
     identifier: "mailjet",
@@ -666,6 +737,27 @@ export const REGISTRY: {
     genre: "design",
     url: "https://www.notion.so",
     txt_values: ["notion-domain-verification"],
+  },
+  customer_io: {
+    identifier: "customer_io",
+    name: "Customer.io",
+    genre: "email",
+    url: "https://www.customer.io",
+    substrings: ["customerioforms"],
+  },
+  cloudinary: {
+    identifier: "cloudinary",
+    name: "Cloudinary",
+    genre: "hosting",
+    url: "https://www.cloudinary.com",
+    substrings: ["res.cloudinary.com"],
+  },
+  oembed: {
+    identifier: "oembed",
+    name: "OEmbed",
+    genre: "open_web",
+    url: "https://oembed.com",
+    substrings: ["json+oembed"],
   },
   statuspage: {
     identifier: "statuspage",
@@ -737,6 +829,10 @@ export const REGISTRY: {
     url: "https://www.heroku.com",
     genre: "hosting",
     cname_values: ["herokudns.com"],
+    headers: {
+      key: "text/headers/nel",
+      value: "heroku-nel",
+    },
   },
   ovh: {
     identifier: "ovh",
@@ -759,6 +855,10 @@ export const REGISTRY: {
     genre: "web_framework",
     substrings: ["/js/webflow"],
     cname_values: ["proxy-ssl.webflow.com"],
+    headers: {
+      key: "text/headers/vary",
+      value: "x-wf-forwarded-proto",
+    },
   },
   loops: {
     identifier: "loops",
@@ -772,6 +872,10 @@ export const REGISTRY: {
     name: "Netlify",
     url: "https://www.netlify.com",
     genre: "hosting",
+    headers: {
+      key: "text/headers/server",
+      value: "Netlify",
+    },
   },
   fathom: {
     identifier: "fathom",
@@ -808,6 +912,34 @@ export const REGISTRY: {
     genre: "podcast",
     substrings: [".transistor.fm"],
   },
+  fastly: {
+    identifier: "fastly",
+    name: "Fastly",
+    url: "https://www.fastly.com",
+    genre: "hosting",
+    txt_values: ["fastly-domain-delegation"],
+  },
+  postman: {
+    identifier: "postman",
+    name: "Postman",
+    url: "https://www.postman.com",
+    genre: "devtools",
+    txt_values: ["postman-domain-verification"],
+  },
+  docker: {
+    identifier: "docker",
+    name: "Docker",
+    url: "https://www.docker.com",
+    genre: "hosting",
+    txt_values: ["docker-verification"],
+  },
+  canva: {
+    identifier: "canva",
+    name: "Canva",
+    url: "https://www.canva.com",
+    genre: "design",
+    txt_values: ["canva-domain-verification"],
+  },
   rewardful: {
     identifier: "rewardful",
     name: "Rewardful",
@@ -820,6 +952,24 @@ export const REGISTRY: {
     name: "PHP",
     url: "https://www.php.net",
     genre: "web_framework",
+    headers: {
+      key: "text/headers/set-cookie",
+      value: "PHPSESSID",
+    },
+  },
+  globalsign: {
+    identifier: "globalsign",
+    name: "GlobalSign",
+    url: "https://www.globalsign.com",
+    genre: "security",
+    txt_values: ["globalsign-domain-verification"],
+  },
+  zoom: {
+    identifier: "zoom",
+    name: "Zoom",
+    url: "https://www.zoom.us",
+    genre: "videos",
+    txt_values: ["zoom-domain-verification"],
   },
   shopify: {
     identifier: "shopify",
@@ -830,12 +980,50 @@ export const REGISTRY: {
     substrings: ["shopifycdn.com"],
     spf_values: ["shops.shopify.com"],
   },
+  asp_net: {
+    identifier: "asp_net",
+    name: "ASP.NET",
+    url: "https://www.asp.net",
+    genre: "web_framework",
+    headers: {
+      key: "x-powered-by",
+      value: "ASP.NET",
+    },
+  },
+  atproto: {
+    identifier: "atproto",
+    name: "ATPROTO",
+    url: "https://www.atproto.com",
+    genre: "open_web",
+    dns_prefix: "_atproto",
+  },
+  bimi: {
+    identifier: "bimi",
+    name: "BIMI",
+    url: "https://www.bimi.com",
+    genre: "open_web",
+    dns_prefix: "_bimi",
+  },
+  dmarc: {
+    identifier: "dmarc",
+    name: "DMARC",
+    url: "https://www.dmarc.com",
+    genre: "open_web",
+    dns_prefix: "_dmarc",
+  },
+  investorflow: {
+    identifier: "investorflow",
+    name: "InvestorFlow",
+    url: "https://www.investorflow.com",
+    genre: "marketing",
+    txt_values: ["investorflow.com"],
+  },
   rails: {
     identifier: "rails",
     name: "Ruby on Rails",
     url: "https://rubyonrails.org",
     genre: "web_framework",
-    substrings: ["data-turbo"],
+    substrings: ["data-turbo", "RAILS_ENV"],
   },
   new_relic: {
     identifier: "new_relic",
@@ -860,6 +1048,13 @@ export const REGISTRY: {
     substrings: ["klaviyo.init"],
     spf_values: ["klaviyomail.com"],
   },
+  "101domain": {
+    identifier: "101domain",
+    name: "101domain",
+    url: "https://www.101domain.com",
+    genre: "dns",
+    ns_values: ["ns1.101domain.com", "ns2.101domain.com"],
+  },
   apollo: {
     identifier: "apollo",
     name: "Apollo",
@@ -872,7 +1067,9 @@ export const REGISTRY: {
     name: "Brevo",
     url: "https://www.brevo.com",
     genre: "email",
-    txt_values: ["brevo-code"],
+    txt_values: ["brevo-code", "Sendinblue-code"],
+    substrings: ["sib_signup_form"],
+    spf_values: ["spf.sendinblue.com"],
   },
   adobe: {
     identifier: "adobe",
@@ -939,6 +1136,10 @@ export const REGISTRY: {
     url: "https://www.fly.io",
     genre: "hosting",
     cname_values: ["fly.dev"],
+    headers: {
+      key: "text/headers/fly-request-id",
+      value: "*",
+    },
   },
   mimecast: {
     identifier: "mimecast",
@@ -979,7 +1180,7 @@ export const REGISTRY: {
     identifier: "jekyll",
     name: "Jekyll",
     url: "https://www.jekyllrb.com",
-    genre: "web_framework",
+    genre: "static_site_generator",
     substrings: ['content="Jekyll'],
   },
   plausible: {
@@ -1022,7 +1223,7 @@ export const REGISTRY: {
     name: "Buttondown",
     url: "https://www.buttondown.email",
     genre: "email",
-    substrings: ["buttondown.email/"],
+    substrings: ["buttondown.email/", "buttondown.com/"],
   },
   intercom: {
     identifier: "intercom",
@@ -1144,6 +1345,13 @@ export const REGISTRY: {
     genre: "email",
     spf_values: ["spf.smtp2go.com"],
   },
+  dynatrace: {
+    identifier: "dynatrace",
+    name: "Dynatrace",
+    url: "https://www.dynatrace.com",
+    genre: "monitoring",
+    txt_values: ["Dynatrace-site-verification"],
+  },
   salesforce: {
     identifier: "salesforce",
     name: "Salesforce",
@@ -1151,12 +1359,20 @@ export const REGISTRY: {
     genre: "crm",
     spf_values: ["_spf.salesforce.com", "cust-spf.exacttarget.com"],
   },
+  salesforce_marketing_cloud: {
+    identifier: "salesforce_marketing_cloud",
+    name: "Salesforce Marketing Cloud",
+    url: "https://www.salesforce.com",
+    genre: "marketing",
+    txt_values: ["SMFC-"],
+  },
   happyfox: {
     identifier: "happyfox",
     name: "HappyFox",
     genre: "support",
     spf_values: ["spf.happyfox.com"],
     url: "https://www.happyfox.com",
+    substrings: ["HFCHAT_CONFIG"],
   },
   consider: {
     identifier: "consider",
@@ -1172,6 +1388,13 @@ export const REGISTRY: {
     genre: "web_framework",
     substrings: ["__svelte__", "__sveltekit"],
   },
+  dropcatch: {
+    identifier: "dropcatch",
+    name: "Dropcatch",
+    url: "https://www.dropcatch.com",
+    genre: "dns",
+    ns_values: ["ns1.dropcatch.com", "ns2.dropcatch.com"],
+  },
   twitter: {
     identifier: "twitter",
     name: "Twitter",
@@ -1179,6 +1402,13 @@ export const REGISTRY: {
     url: "https://www.twitter.com",
     icon: <Icon.Twitter className="size-6" />,
     urlSubstrings: ["twitter.com", "x.com"],
+  },
+  medium: {
+    identifier: "medium",
+    name: "Medium",
+    genre: "social_media",
+    url: "https://www.medium.com",
+    urlSubstrings: ["medium.com"],
   },
   email_octopus: {
     identifier: "email_octopus",
@@ -1206,7 +1436,7 @@ export const REGISTRY: {
     name: "AWeber",
     genre: "email",
     url: "https://www.aweber.com",
-    spf_values: ["send.aweber.com"],
+    spf_values: ["send.aweber.com", "fbl.optin.com"],
   },
   font_awesome: {
     identifier: "font_awesome",
@@ -1224,6 +1454,13 @@ export const REGISTRY: {
     genre: "email",
     url: "https://www.moosend.com",
     spf_values: ["spfa.mailend.com"],
+  },
+  uptimerobot: {
+    identifier: "uptimerobot",
+    name: "UptimeRobot",
+    genre: "monitoring",
+    url: "https://www.uptimerobot.com",
+    cname_values: ["stats.uptimerobot.com"],
   },
   oneuptime: {
     identifier: "oneuptime",
@@ -1309,6 +1546,7 @@ export const REGISTRY: {
       "linkedin.com/company",
       "linkedin.com/school",
       "linkedin.com",
+      "linkedin.com/in",
     ],
   },
   linkedin_ads: {
@@ -1319,6 +1557,27 @@ export const REGISTRY: {
     icon: <Icon.LinkedIn className="size-6" />,
     substrings: ["ads.linkedin.com"],
   },
+  hugo: {
+    identifier: "hugo",
+    name: "Hugo",
+    genre: "static_site_generator",
+    url: "https://gohugo.io",
+    substrings: ['content="Hugo'],
+  },
+  fuse: {
+    identifier: "fuse",
+    name: "Fuse",
+    genre: "search",
+    url: "https://www.fusejs.io",
+    substrings: ["/fuse.js"],
+  },
+  typekit: {
+    identifier: "typekit",
+    name: "Typekit",
+    genre: "web_framework",
+    url: "https://typekit.com",
+    substrings: ["typekit.net"],
+  },
   youtube: {
     identifier: "youtube",
     name: "YouTube",
@@ -1326,6 +1585,13 @@ export const REGISTRY: {
     url: "https://www.youtube.com",
     icon: <Icon.YouTube className="size-6" />,
     urlSubstrings: ["youtube.com", "youtube.com/c", "youtube.com/channel"],
+  },
+  hashicorp: {
+    identifier: "hashicorp",
+    name: "HashiCorp",
+    genre: "hosting",
+    url: "https://www.hashicorp.com",
+    txt_values: ["hcp-domain-verification"],
   },
   afterpay: {
     identifier: "afterpay",
@@ -1340,6 +1606,13 @@ export const REGISTRY: {
     genre: "marketing",
     url: "https://www.stackadapt.com",
     substrings: ["srv.stackadapt.com"],
+  },
+  google_fonts: {
+    identifier: "google_fonts",
+    name: "Google Fonts",
+    genre: "web_framework",
+    url: "https://fonts.google.com",
+    substrings: ["fonts.googleapis.com"],
   },
   chrome_webstore: {
     identifier: "chrome_webstore",
@@ -1376,6 +1649,27 @@ export const REGISTRY: {
     url: "https://firebase.google.com",
     substrings: ["gstatic.com/firebasejs"],
     spf_values: ["_spf.firebasemail.com"],
+  },
+  piwik: {
+    identifier: "piwik",
+    name: "Piwik",
+    genre: "analytics",
+    url: "https://www.piwik.org",
+    substrings: ["piwik.js", "piwik.pro"],
+  },
+  genesys: {
+    identifier: "genesys",
+    name: "Genesys",
+    genre: "support",
+    url: "https://www.genesys.com",
+    substrings: ["Genesys("],
+  },
+  cookiebot: {
+    identifier: "cookiebot",
+    name: "Cookiebot",
+    genre: "gdpr",
+    url: "https://www.cookiebot.com",
+    substrings: ["consent.cookiebot.com"],
   },
   cookiefirst: {
     identifier: "cookiefirst",
@@ -1521,6 +1815,13 @@ export const REGISTRY: {
     genre: "form",
     url: "https://www.formspark.io",
     substrings: ["submit-form.io"],
+  },
+  formkeep: {
+    identifier: "formkeep",
+    name: "FormKeep",
+    genre: "form",
+    url: "https://www.formkeep.com",
+    substrings: ["formkeep.com/f"],
   },
   revue: {
     identifier: "revue",

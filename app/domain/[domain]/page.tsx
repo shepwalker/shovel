@@ -2,7 +2,7 @@ import DomainIcon from "@/components/DomainIcon";
 import Grid from "@/components/Grid";
 import SectionHeader from "@/components/SectionHeader";
 import fetch from "@/lib/data";
-import { db } from "@/lib/db/connection";
+import { reify } from "@/lib/db/domains";
 import { GENRE_REGISTRY, REGISTRY } from "@/lib/services";
 import { Metadata, ResolvingMetadata } from "next";
 
@@ -10,32 +10,23 @@ type Props = {
   params: { domain: string };
 };
 
-const generateURLForSocialMedia = (service: string, username: string) => {
-  if (service === "twitter") {
-    return `https://twitter.com/${username}`;
-  }
-  if (service === "linkedin") {
-    return `https://linkedin.com/in/${username}`;
-  }
-  if (service === "facebook") {
-    return `https://facebook.com/${username}`;
-  }
-  if (service === "instagram") {
-    return `https://instagram.com/${username}`;
-  }
-  if (service === "youtube") {
-    return `https://youtube.com/${username}`;
-  }
-  if (service === "tiktok") {
-    return `https://tiktok.com/@${username}`;
-  }
-  if (service === "bluesky") {
-    return `https://bsky.social/${username}`;
-  }
-  if (service === "github") {
-    return `https://github.com/${username}`;
-  }
-  return "";
+const SOCIAL_MEDIA_URL_TEMPLATES: { [key: string]: string } = {
+  twitter: "https://twitter.com/",
+  linkedin: "https://linkedin.com/in/",
+  facebook: "https://facebook.com/",
+  instagram: "https://instagram.com/",
+  youtube: "https://youtube.com/",
+  tiktok: "https://tiktok.com/@",
+  bluesky: "https://bsky.social/",
+  github: "https://github.com/",
+};
+
+const generateURLForSocialMedia = (
+  service: string,
+  username: string
+): string => {
+  const template = SOCIAL_MEDIA_URL_TEMPLATES[service];
+  return template ? `${template}${username}` : "";
 };
 
 export async function generateMetadata(
@@ -73,43 +64,7 @@ export default async function Page({
   };
 }) {
   const data = await fetch(params.domain);
-  await db
-    .insertInto("domains")
-    .values({
-      domain: params.domain,
-      data: JSON.stringify(data),
-    })
-    .execute();
-
-  const existingTechnologies = await db
-    .selectFrom("detected_technologies")
-    .select("technology")
-    .where("domain", "=", params.domain)
-    .execute();
-
-  const existingTechSet = new Set(
-    existingTechnologies.map((tech) => tech.technology)
-  );
-
-  const newTechnologies = data.notes
-    .filter(
-      (note) =>
-        ["SERVICE"].includes(note.label) &&
-        !existingTechSet.has(note.metadata.value)
-    )
-    .map((note) => ({
-      domain: params.domain,
-      technology: note.metadata.value,
-      data: JSON.stringify(note.metadata),
-      creation_date: new Date().toISOString(),
-    }));
-
-  if (newTechnologies.length > 0) {
-    await db
-      .insertInto("detected_technologies")
-      .values(newTechnologies)
-      .execute();
-  }
+  await reify(params.domain, data);
 
   return (
     <div className="">
@@ -137,8 +92,18 @@ export default async function Page({
             )}
         </tbody>
       </table>
-      <SectionHeader>Subdomains</SectionHeader>
-      <Grid.Container>
+      <SectionHeader>Tranco ranking</SectionHeader>
+      <ul>
+        {data.data
+          .filter((datum) => datum.label === "Tranco")
+          .flatMap((datum) =>
+            datum.data.map((record) => (
+              <li key={record.value}>#{record.value}</li>
+            ))
+          )}
+        <ul className="only:block hidden opacity-50">No Tranco record found</ul>
+      </ul>
+      <Grid.Container title="Subdomains">
         {data.notes
           .filter((datum) => datum.label === "SUBDOMAIN")
           .map((note, i) => (
@@ -147,8 +112,7 @@ export default async function Page({
             </Grid.Item>
           ))}
       </Grid.Container>
-      <SectionHeader>Services</SectionHeader>
-      <Grid.Container>
+      <Grid.Container title="Services">
         {data.notes
           .filter((datum) => datum.label === "SERVICE")
           .filter((note) => REGISTRY[note.metadata.value])
@@ -165,8 +129,7 @@ export default async function Page({
             </Grid.Item>
           ))}
       </Grid.Container>
-      <SectionHeader>Social media</SectionHeader>
-      <Grid.Container>
+      <Grid.Container title="Social media">
         {data.notes
           .filter((datum) => datum.label === "SERVICE")
           .filter(
@@ -188,41 +151,6 @@ export default async function Page({
             </Grid.Item>
           ))}
       </Grid.Container>
-      <SectionHeader>DMARC</SectionHeader>
-      <ul>
-        {data.data
-          .filter((datum) => datum.label === "DMARC")
-          .flatMap((datum) =>
-            datum.data.map((record) => (
-              <li key={record.value}>{record.value}</li>
-            ))
-          )}
-        <ul className="only:block hidden opacity-50">No DMARC record found</ul>
-      </ul>
-      <SectionHeader>BIMI</SectionHeader>
-      <ul>
-        {data.data
-          .filter((datum) => datum.label === "BIMI")
-          .flatMap((datum) =>
-            datum.data.map((record) => (
-              <li key={record.value}>{record.value}</li>
-            ))
-          )}
-        <ul className="only:block hidden opacity-50">No BIMI record found</ul>
-      </ul>
-      <SectionHeader>ATPROTO</SectionHeader>
-      <ul>
-        {data.data
-          .filter((datum) => datum.label === "ATPROTO")
-          .flatMap((datum) =>
-            datum.data.map((record) => (
-              <li key={record.value}>{record.value}</li>
-            ))
-          )}
-        <ul className="only:block hidden opacity-50">
-          No ATPROTO record found
-        </ul>
-      </ul>
       <SectionHeader>JSON+LD</SectionHeader>
       <ul>
         {data.notes.find((datum) => datum.label === "JSON+LD")?.metadata && (
@@ -239,24 +167,6 @@ export default async function Page({
         )}
         <ul className="only:block hidden opacity-50">
           No JSON+LD record found
-        </ul>
-      </ul>
-      <SectionHeader>Notes</SectionHeader>
-      <ul>
-        {data.notes
-          .filter((note) => note.label !== "JSON+LD")
-          .filter((note) => note.label !== "SOCIAL_MEDIA")
-          .filter((note) => note.label !== "SERVICE")
-          .filter((note) => note.label !== "SUBDOMAIN")
-          .map((note, i) => (
-            <li key={i}>
-              <ServicePill service={note.label} />{" "}
-              {Object.keys(note.metadata).length > 0 &&
-                JSON.stringify(note.metadata)}
-            </li>
-          ))}
-        <ul className="only:block hidden opacity-50">
-          No additional notes found
         </ul>
       </ul>
     </div>
